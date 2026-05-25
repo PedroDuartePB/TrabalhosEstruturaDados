@@ -58,11 +58,8 @@ def createBoard(numLinhas: int, numColunas: int, simbolo: int) -> list:
 #  Returns: None -- the game board passed as a parameter is modified
 #
 def swap(board, r1, c1, r2, c2):
-  e1 = board[r1][c1]
-  e2 = board[r2][c2]
-# if canSwap(): -> talvez ajude no futuro
-  board[r1][c1] = e2
-  board[r2][c2] = e1
+  if canSwap(board, r1, c1, r2, c2):
+    board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
 
 #
 #  Modify the board to clear all occurences of a given piece, replacing them
@@ -83,12 +80,38 @@ def clearAll(board: list, sym: int) -> None:
 #
 #  Insert your implementations of vLineAt and hLineAt here
 #
-def vLineAt(board:list, ln:int, cn:int) -> bool:
-  pass
+def vLineAt(board:list, lin:int, col:int) -> bool:
+  count = 0
+  index = 0
+  x = board[lin][col]
+
+  while count != 3:
+    if index == len(board):
+      break
+    elif board[index][col] == x:
+      count += 1
+    else:
+      count = 0
+    index += 1   
+
+  return count == 3
 
 
-def hlineAt(board:list, ln:int, cn:int) -> bool:
-  pass
+def hLineAt(board:list, lin:int, col:int) -> bool:
+  count = 0
+  index = 0
+  x = board[lin][col]
+
+  while count != 3:
+    if index == len(board[lin]):
+      break
+    elif board[lin][index] == x:
+      count += 1
+    else:
+      count = 0
+    index += 1
+  
+  return count == 3
 
 
 #
@@ -104,7 +127,12 @@ def hlineAt(board:list, ln:int, cn:int) -> bool:
 #  Returns: True if the proposed swap creates a line.  False otherwise.
 #
 def canSwap(board, r1, c1, r2, c2):
+# if hLineAt(board, r1, c2):
+#    return True
+# elif vLineAt(board, c1, r2):
   return True
+#  else:
+#    return False **/
 
 #
 #  Identify two adjacent positions on the board that can be swapped to 
@@ -287,7 +315,7 @@ def test_hLineAt():
         [3, 4, 5, 0, 1, 2, 3], \
         [4, 5, 1, 2, 3, 4, 5], \
         [1, 2, 3, 4, 5, 0, 1], \
-        [0, 1, 2, 3, 0, 0, 0]], 5, 0, False), \
+        [0, 1, 2, 3, 0, 0, 0]], 5, 0, True), \
       ([[2, 3, 4, 1, 2, 3, 4], \
         [1, 2, 3, 4, 5, 1, 2], \
         [0, 0, 5, 0, 1, 2, 0], \
