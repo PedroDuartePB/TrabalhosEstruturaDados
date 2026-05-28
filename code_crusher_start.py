@@ -97,8 +97,7 @@ def vLineAt(board:list, lin:int, col:int) -> bool:
 
 
 def hLineAt(board:list, lin:int, col:int) -> bool:
-  count = 0
-  index = 0
+  count, index = 0, 0
   x = board[lin][col]
 
   while count != 3:
@@ -148,9 +147,19 @@ def canSwap(board, r1, c1, r2, c2):
 #           is possible then -1, -1, -1, -1 is returned.
 #
 def hint(board):
-  for line in board:
-    if 
-  return 
+  n, m = 0, 0
+  for i in range(1, len(board)):
+    for j in range(0, len(board[1])):
+      n = i-1
+      if canSwap(board, n, j, i, j):
+        return (n, j, i, j)
+  for h in range(0, len(board)):
+    for k in range(1, len(board[1])):
+      m = k-1
+      if canSwap(board, h, m, h, k):
+        return (h, m, h, k)
+  return (-1, -1, -1, -1)
+  
 
 ##############################################################################
 #
