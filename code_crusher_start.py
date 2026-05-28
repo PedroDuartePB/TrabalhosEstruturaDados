@@ -58,8 +58,7 @@ def createBoard(numLinhas: int, numColunas: int, simbolo: int) -> list:
 #  Returns: None -- the game board passed as a parameter is modified
 #
 def swap(board, r1, c1, r2, c2):
-  if canSwap(board, r1, c1, r2, c2):
-    board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
+  board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
 
 #
 #  Modify the board to clear all occurences of a given piece, replacing them
@@ -127,12 +126,15 @@ def hLineAt(board:list, lin:int, col:int) -> bool:
 #  Returns: True if the proposed swap creates a line.  False otherwise.
 #
 def canSwap(board, r1, c1, r2, c2):
-# if hLineAt(board, r1, c2):
-#    return True
-# elif vLineAt(board, c1, r2):
-  return True
-#  else:
-#    return False **/
+  canSwap = False
+  # Queria fazer sem mexer no tabuleiro, mas não estou achando a solução 
+  # Sobrou fazer e desfazer mesmo
+  board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
+  if vLineAt(board, r1, c1) or hLineAt(board, r1, c1) or vLineAt(board, r2, c2) or hLineAt(board, r2, c2):
+    canSwap = True
+  board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
+
+  return canSwap
 
 #
 #  Identify two adjacent positions on the board that can be swapped to 
@@ -146,7 +148,9 @@ def canSwap(board, r1, c1, r2, c2):
 #           is possible then -1, -1, -1, -1 is returned.
 #
 def hint(board):
-  return -1, -1, -1, -1
+  for line in board:
+    if 
+  return 
 
 ##############################################################################
 #
