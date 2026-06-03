@@ -59,7 +59,7 @@ def createBoard(rows, cols, numSymbols):
 #  Returns: None -- the game board passed as a parameter is modified
 #
 def swap(board, r1, c1, r2, c2):
-    board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
+  board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
 
 #
 #  Modify the board to clear all occurences of a given piece, replacing them
@@ -117,6 +117,34 @@ def hLineAt(board, row, col):
     return False
 
 
+# Não sei dizer qual é a mais eficiente dessas duas.
+#def vLineAt(board:list, lin:int, col:int) -> bool:
+#  count = 0
+#  index = 0
+#  x = board[lin][col]
+#  while count != 3:
+#    if index == len(board):
+#      break
+#    elif board[index][col] == x:
+#      count += 1
+#    else:
+#      count = 0
+#    index += 1   
+#  return count == 3
+#
+#
+#def hLineAt(board:list, lin:int, col:int) -> bool:
+#  count, index = 0, 0
+#  x = board[lin][col]
+#  while count != 3:
+#    if index == len(board[lin]):
+#     break
+#    elif board[lin][index] == x:
+#      count += 1
+#    else:
+#      count = 0
+#    index += 1 
+#  return count == 3
 #
 #  Report whether or not two pieces on the board can be swapped.  The function
 #  should only return true when performing the swap results in a line being
@@ -153,9 +181,28 @@ def canSwap(board, r1, c1, r2, c2):
 #  Returns: The row and column of the first piece, followed by the row and
 #           column of the second piece involved in the swap.  If no swap
 #           is possible then -1, -1, -1, -1 is returned.
-#
+
+# Deve ter uma forma mais eficiente de estruturar isso e uma forma de fazer em um loop só também
 def hint(board):
-  return -1, -1, -1, -1
+  n, m = 0, 0
+  
+# Verifica coluna por coluna se o elemento da linha i poder ser trocado com o elemento acima dele
+  for i in range(1, len(board)):
+    for j in range(0, len(board[1])):
+      n = i-1
+      if canSwap(board, n, j, i, j):
+        return (n, j, i, j)
+
+# Olha linha por linha se o elemento k pode ser trocado com o seu antecessor
+  for h in range(0, len(board)):
+    for k in range(1, len(board[1])):
+      m = k-1
+      if canSwap(board, h, m, h, k):
+        return (h, m, h, k)
+
+# Se nenhum dos dois casos, retorna vazio
+  return (-1, -1, -1, -1)
+  
 
 ##############################################################################
 #
@@ -324,7 +371,7 @@ def test_hLineAt():
         [3, 4, 5, 0, 1, 2, 3], \
         [4, 5, 1, 2, 3, 4, 5], \
         [1, 2, 3, 4, 5, 0, 1], \
-        [0, 1, 2, 3, 0, 0, 0]], 5, 0, False), \
+        [0, 1, 2, 3, 0, 0, 0]], 5, 0, True), \
       ([[2, 3, 4, 1, 2, 3, 4], \
         [1, 2, 3, 4, 5, 1, 2], \
         [0, 0, 5, 0, 1, 2, 0], \
