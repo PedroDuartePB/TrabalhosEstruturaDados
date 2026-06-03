@@ -145,19 +145,26 @@ def canSwap(board, r1, c1, r2, c2):
 #  Returns: The row and column of the first piece, followed by the row and
 #           column of the second piece involved in the swap.  If no swap
 #           is possible then -1, -1, -1, -1 is returned.
-#
+
+# Deve ter uma forma mais eficiente de estruturar isso e uma forma de fazer em um loop só também
 def hint(board):
   n, m = 0, 0
+  
+# Verifica coluna por coluna se o elemento da linha i poder ser trocado com o alemento acima dele
   for i in range(1, len(board)):
     for j in range(0, len(board[1])):
       n = i-1
       if canSwap(board, n, j, i, j):
         return (n, j, i, j)
+
+# Olha linha por linha se o elemento k pode ser trocado com o seu antecessor
   for h in range(0, len(board)):
     for k in range(1, len(board[1])):
       m = k-1
       if canSwap(board, h, m, h, k):
         return (h, m, h, k)
+
+# Se nenhum dos dois casos, retorna vazio
   return (-1, -1, -1, -1)
   
 
