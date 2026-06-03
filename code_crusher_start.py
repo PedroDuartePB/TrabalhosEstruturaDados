@@ -38,13 +38,14 @@ LOSE = -1
 #
 #  Insert your implementation of createBoard here
 #
-def createBoard(numLinhas: int, numColunas: int, simbolo: int) -> list:
-  board: list = [[0]*numColunas]*numLinhas
-
-  for linha in board:
-    for e in range(0, numColunas):
-       linha[e] = randrange(0, simbolo)
-  return board
+def createBoard(rows, cols, numSymbols):
+    board = []
+    for _ in range(rows):
+        row = []
+        for _ in range(cols):
+            row.append(randrange(numSymbols))
+        board.append(row)
+    return board
 
 
 #
@@ -70,48 +71,80 @@ def swap(board, r1, c1, r2, c2):
 #
 #  Returns: None -- the game board passed as a parameter is modified
 #
-def clearAll(board: list, sym: int) -> None:
-  for linha in board:
-    for e in range(len(linha)):
-      if linha[e] == sym:
-        linha [e] = EMPTY      
+def clearAll(board, symbol):
+    for r in range(len(board)):
+        for c in range(len(board[r])):
+            if board[r][c] == symbol:
+                board[r][c] = EMPTY
 
 #
 #  Insert your implementations of vLineAt and hLineAt here
 #
-def vLineAt(board:list, lin:int, col:int) -> bool:
-  count = 0
-  index = 0
-  x = board[lin][col]
+def vLineAt(board, row, col):
+    rows = len(board)
+    symbol = board[row][col]
+    
+    if symbol == EMPTY:
+        return False
+        
+    if row + 2 < rows and board[row+1][col] == symbol and board[row+2][col] == symbol:
+        return True
+        
+    if row - 1 >= 0 and row + 1 < rows and board[row-1][col] == symbol and board[row+1][col] == symbol:
+        return True
+        
+    if row - 2 >= 0 and board[row-1][col] == symbol and board[row-2][col] == symbol:
+        return True
+        
+    return False
 
-  while count != 3:
-    if index == len(board):
-      break
-    elif board[index][col] == x:
-      count += 1
-    else:
-      count = 0
-    index += 1   
-
-  return count == 3
-
-
-def hLineAt(board:list, lin:int, col:int) -> bool:
-  count, index = 0, 0
-  x = board[lin][col]
-
-  while count != 3:
-    if index == len(board[lin]):
-      break
-    elif board[lin][index] == x:
-      count += 1
-    else:
-      count = 0
-    index += 1
-  
-  return count == 3
+def hLineAt(board, row, col):
+    cols = len(board[0]) if len(board) > 0 else 0
+    symbol = board[row][col]
+    
+    if symbol == EMPTY:
+        return False
+        
+    if col + 2 < cols and board[row][col+1] == symbol and board[row][col+2] == symbol:
+        return True
+        
+    if col - 1 >= 0 and col + 1 < cols and board[row][col-1] == symbol and board[row][col+1] == symbol:
+        return True
+        
+    if col - 2 >= 0 and board[row][col-1] == symbol and board[row][col-2] == symbol:
+        return True
+        
+    return False
 
 
+# Não sei dizer qual é a mais eficiente dessas duas.
+#def vLineAt(board:list, lin:int, col:int) -> bool:
+#  count = 0
+#  index = 0
+#  x = board[lin][col]
+#  while count != 3:
+#    if index == len(board):
+#      break
+#    elif board[index][col] == x:
+#      count += 1
+#    else:
+#      count = 0
+#    index += 1   
+#  return count == 3
+#
+#
+#def hLineAt(board:list, lin:int, col:int) -> bool:
+#  count, index = 0, 0
+#  x = board[lin][col]
+#  while count != 3:
+#    if index == len(board[lin]):
+#     break
+#    elif board[lin][index] == x:
+#      count += 1
+#    else:
+#      count = 0
+#    index += 1 
+#  return count == 3
 #
 #  Report whether or not two pieces on the board can be swapped.  The function
 #  should only return true when performing the swap results in a line being
@@ -125,15 +158,18 @@ def hLineAt(board:list, lin:int, col:int) -> bool:
 #  Returns: True if the proposed swap creates a line.  False otherwise.
 #
 def canSwap(board, r1, c1, r2, c2):
-  canSwap = False
-  # Queria fazer sem mexer no tabuleiro, mas não estou achando a solução 
-  # Sobrou fazer e desfazer mesmo
-  board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
-  if vLineAt(board, r1, c1) or hLineAt(board, r1, c1) or vLineAt(board, r2, c2) or hLineAt(board, r2, c2):
-    canSwap = True
-  board[r1][c1], board[r2][c2] = board[r2][c2], board[r1][c1]
+    swap(board, r1, c1, r2, c2)
+    
 
-  return canSwap
+    forms_line = False
+    if hLineAt(board, r1, c1) or vLineAt(board, r1, c1):
+        forms_line = True
+    elif hLineAt(board, r2, c2) or vLineAt(board, r2, c2):
+        forms_line = True
+        
+    swap(board, r1, c1, r2, c2)
+    
+    return forms_line
 
 #
 #  Identify two adjacent positions on the board that can be swapped to 
@@ -150,7 +186,7 @@ def canSwap(board, r1, c1, r2, c2):
 def hint(board):
   n, m = 0, 0
   
-# Verifica coluna por coluna se o elemento da linha i poder ser trocado com o alemento acima dele
+# Verifica coluna por coluna se o elemento da linha i poder ser trocado com o elemento acima dele
   for i in range(1, len(board)):
     for j in range(0, len(board[1])):
       n = i-1
