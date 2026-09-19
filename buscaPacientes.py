@@ -24,11 +24,16 @@ class No:
     def __init__(self, paciente:Paciente):
         self.paciente = paciente
 
+    def has_children(self)->bool:
+        if self.pont_esq or self.pont_dir:
+            return True
+        else:
+            return False
 
 class Arvore:
     def __init__(self):
         self.Nos = []
-        self.raiz = None
+        self.raiz: No | None = None
 
     def adicionar(self, paciente:Paciente):
         if self.raiz is None:
@@ -58,21 +63,44 @@ class Arvore:
 
     def remover(self, chave:int):
         alvo = self.buscar(chave)
-        pai = alvo.pai
+        if not alvo is None:
+            pai = alvo.pai
 
-        if chave > alvo.pai.paciente.cpf:
-            pai.pont_dir = None
-        elif chave < alvo.pai.paciente.cpf:
-            pai.pont_esq = None
+            if chave > pai.paciente.cpf:
+                pai.pont_dir = None
+            elif chave < pai.paciente.cpf:
+                pai.pont_esq = None
 
-        delattr(alvo, 'pai')
-        delattr(alvo, 'paciente')
-        delattr(alvo, 'pont_dir')
-        delattr(alvo, 'pont_esq')
-        del alvo
-        gc.collect()
+            if not alvo.pont_esq is None:
+                self.realocar_no(alvo.pont_esq)
+            if not alvo.pont_dir is None:
+                self.realocar_no(alvo.pont_dir)
 
-    def buscar(self, chave:int)->No:
+            delattr(alvo, 'pai')
+            delattr(alvo, 'paciente')
+            delattr(alvo, 'pont_dir')
+            delattr(alvo, 'pont_esq')
+            del alvo
+            gc.collect()
+
+    def realocar_no(self, no:No):
+        avo = no.pai.pai
+        atual, cpf, prox = None, no.paciente.cpf,avo
+
+        while not prox is None:
+            atual = prox
+            if atual.paciente.cpf < cpf:
+                prox = atual.pont_dirs
+            elif atual.paciente.cpf > cpf:
+                prox = atual.pont_esq
+
+        no.pai = atual
+        if atual.paciente.cpf > cpf:
+            atual.pont_esq = no
+        else:
+            atual.pont_dir = no
+
+    def buscar(self, chave:int)->No|None:
         atual = self.raiz
 
         while not atual is None and atual.paciente.cpf != chave:
