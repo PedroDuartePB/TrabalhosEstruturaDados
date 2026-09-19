@@ -14,6 +14,9 @@ class Paciente:
         self.cartao_sus = cartao_sus
         self.tipo_atendimento = tipo_atendimento
 
+    def __str__(self) -> str:
+        return f"{self.cpf}, {self.nome_completo}, {self.cartao_sus}, {self.tipo_atendimento}"
+
 
 class No:
     paciente: Paciente
@@ -51,19 +54,19 @@ class Arvore:
                     atual = atual.pont_esq
                 else:
                     raise CPFAlreadyInUseE("O cpf informado já está em uso")
-
+            novo = No(paciente)
             if paciente.cpf > pai.paciente.cpf:
-                pai.pont_dir = No(paciente)
-                pai.pont_dir.pai = pai
+                pai.pont_dir = novo
+                novo.pai = pai
             elif paciente.cpf < pai.paciente.cpf:
-                pai.pont_esq = No(paciente)
-                pai.pont_dir.pai = pai
+                pai.pont_esq = novo
+                novo.pai = pai
 
 
-
+    # função para remoção não testada
     def remover(self, chave:int):
         alvo = self.buscar(chave)
-        if not alvo is None:
+        if alvo is No:
             pai = alvo.pai
 
             if chave > pai.paciente.cpf:
@@ -100,7 +103,7 @@ class Arvore:
         else:
             atual.pont_dir = no
 
-    def buscar(self, chave:int)->No|None:
+    def buscar(self, chave:int)->No|int:
         atual = self.raiz
 
         while not atual is None and atual.paciente.cpf != chave:
@@ -108,9 +111,39 @@ class Arvore:
                 atual = atual.pont_dir
             elif chave < atual.paciente.cpf:
                 atual = atual.pont_esq
-
+        if atual is None:
+            return -1
         return atual
 
 class CPFAlreadyInUseE(Exception):
-    def __init__(self, text):
-        super.__init__(text)
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+if __name__ == "__main__":
+    tree = Arvore()
+    p1 = Paciente(20, "jonas", "sus", "a")
+    p2 = Paciente(37, "marcia", "sus", "a")
+    p3 = Paciente(12, "lucas", "sus", "a")
+    p4 = Paciente(5, "fulano", "sus", "a")
+    p5 = Paciente(27, "jessica", "sus", "a")
+    p6 = Paciente(15, "cassio", "sus", "a")
+
+    pacientes = [p1, p2, p3, p4, p5, p6]
+
+    print(tree.buscar(99))
+
+    for i in pacientes:
+        tree.adicionar(i)
+
+    for j in pacientes:
+        print(tree.buscar(j.cpf).paciente)
+
+    print(tree.buscar(99))
+
+    p7 = Paciente( 12,"mariana", "sus", "a")
+    try:
+        tree.adicionar(p7)
+    except CPFAlreadyInUseE as e:
+        print(e)
