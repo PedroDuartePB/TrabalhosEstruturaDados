@@ -24,7 +24,10 @@ class ArvoreCadastros:
         self.raiz: Optional[No] = None
 
     def is_empty(self) -> bool:
-        return self.raiz is None
+        if self.raiz is None:
+            return True
+        else:
+            return False
 
     def cadastrar_paciente(self, novo_paciente:Paciente, chave_alvo: Optional[int]=None):
         #paleativo até eu implementar a prioridade real
@@ -60,19 +63,28 @@ class ArvoreCadastros:
                 atual = atual.direita
         return None
 
-    def remover_paciente(self, cpf: int, raiz: Optional[No]=None) -> Optional[No]:
-        if raiz is None:
-            return None
+    def remover_paciente(self, cpf: int) -> Optional[No]:
+        raiz, no_removido = self._remover_recursivo(cpf, self.raiz)
+        return no_removido
 
-        if cpf < raiz.chave:
-            raiz.esquerda = self.remover_paciente(cpf, raiz.esquerda)
-        elif cpf > raiz.chave:
-            raiz.direita = self.remover_paciente(cpf, raiz.direita)
+    def _remover_recursivo(self, chave: int, raiz: Optional[No]) -> tuple[Optional[No], Optional[No]]:
+        if raiz is None:
+            return None, None
+
+        if chave < raiz.chave:
+            raiz.esquerda, removido = self._remover_recursivo(chave, raiz.esquerda)
+            return raiz, removido
+        elif chave > raiz.chave:
+            raiz.direita, removido = self._remover_recursivo(chave, raiz.direita)
+            return raiz, removido
+
         else:
+            alvo_removido = No(raiz.paciente, raiz.chave)
+
             if raiz.esquerda is None:
-                return raiz.direita
+                return raiz.direita, alvo_removido
             elif raiz.direita is None:
-                return raiz.esquerda
+                return raiz.esquerda, alvo_removido
 
             sucessor = raiz.direita
             while sucessor.esquerda is not None:
@@ -80,9 +92,10 @@ class ArvoreCadastros:
 
             raiz.paciente = sucessor.paciente
             raiz.chave = sucessor.chave
-            raiz.direita = self.remover_paciente(sucessor.chave, raiz.direita)
 
-        return raiz
+            raiz.direita, _ = self._remover_recursivo(sucessor.chave, raiz.direita)
+
+            return raiz, alvo_removido
 
 ######################################################
 # --- para a atividade de prioridade quando ela chegar
@@ -91,16 +104,9 @@ class ArvoreCadastros:
 #    def __init__(self):
 #        self.heap:list[No] = []
 #        self.cauda = 0
-
-
+#
 #    def cadastrar_atendimento_dia(self, cpf: int, nome: str, cartao_sus: str, tipo_atendimento: str):
 #        pass
-
-#    def imprimir_atendimentos_dia(self, raiz: Optional[No]):
-#        if raiz is not None:
-#            print(f"Nome: {raiz.paciente.nome_completo} | CPF: {raiz.paciente.cpf}")
-#            self.imprimir_atendimentos_dia(raiz.esquerda)
-#            self.imprimir_atendimentos_dia(raiz.direita)
 
 
 ######################################################
@@ -111,40 +117,52 @@ class GerenciardorPacientes:
     def __init__(self):
         self.db:ArvoreCadastros = ArvoreCadastros()
         self.agenda = ArvoreCadastros()
+        self.contador_chegada = 0
         #self.agenda = HeapAtendimento()
 
     def cadastro_remover(self, cpf:int):
         raiz = self.db.raiz
-
-        self.db.remover_paciente(cpf, raiz)
+        return self.db.remover_paciente(cpf).paciente
 
     def cadastro_novo(self, cpf: int, nome: str, cartao_sus: str, tipo_atendimento: str):
         self.db.cadastrar_paciente(Paciente(cpf, nome, cartao_sus, tipo_atendimento))
 
     def cadastro_buscar(self, cpf:int):
-        return self.db.buscar_paciente(cpf).paciente
+        cadastro = self.db.buscar_paciente(cpf)
+        if cadastro is not None:
+            return cadastro.paciente
+        else:
+            return None
 
     def agendar_atendimento(self, cpf:int):
         cadastro = self.db.buscar_paciente(cpf)
         if cadastro is None:
-            print("Paciente não encontrado, por favor realise o cadastro.")
-        else:
-            self.agenda.cadastrar_paciente(cadastro.paciente, )
-            print(f"Cadastrado com sucesso: {cadastro.paciente}")
+            print(f"Recepção: CPF {cpf} não cadastrado na base da UBS.")
+            return
+
+        self.contador_chegada += 1
+        self.agenda.cadastrar_paciente(cadastro.paciente, chave_alvo=self.contador_chegada)
+        print(f"Recepção: {cadastro.paciente.nome_completo} chegou e foi enfileirado.")
 
     def flush_agenda(self):
-        if self.agenda.raiz is not None:
-            self.agenda.remover_paciente(self.agenda.raiz.chave, self.agenda.raiz)
+        if not self.agenda.is_empty():
+            self.agenda.remover_paciente(self.agenda.raiz.chave)
 
     def imprimir_atendimentos_dia(self, raiz: Optional[No]):
-        if raiz is not None:
+        if self.agenda.is_empty():
+            print("Não há atendimentos agendados para o dia de hoje.")
+        else:
             print(f"Nome: {raiz.paciente.nome_completo} | CPF: {raiz.paciente.cpf}")
-            self.imprimir_atendimentos_dia(raiz.esquerda)
-            self.imprimir_atendimentos_dia(raiz.direita)
+            if raiz.esquerda is not None:
+                self.imprimir_atendimentos_dia(raiz.esquerda)
+            if raiz.direita is not None:
+                self.imprimir_atendimentos_dia(raiz.direita)
+
 
 if __name__ == "__main__":
     db_paciente = GerenciardorPacientes()
 
+    input("Start: ")
     print("\n--- 1. Carga Inicial de Pacientes da UBS ---")
     pacientes = [(230, "jonas", "sus", "a"),
     (137, "marcia", "sus", "Triagem"),
@@ -159,28 +177,40 @@ if __name__ == "__main__":
     (505, "João Pedro", "sus", "Vacinação"),
     (606, "Camila Alves", "sus", "Consulta")]
 
-    print(db_paciente.db.buscar_paciente(99))
-
     for i in pacientes:
         db_paciente.cadastro_novo(*i)
 
-    print("6 pacientes cadastrados com sucesso.")
+    print("6 pacientes cadastrados com sucesso.\n")
 
     for j in pacientes:
-        print(db_paciente.db.buscar_paciente(int(j[0])))
+        print(db_paciente.cadastro_buscar(int(j[0])))
 
-    print(db_paciente.db.buscar_paciente(99))
-
-    p7 = Paciente(112,"mariana", "sus", "a")
-
-
+    input()
     print("\n--- 2. Remoção de Paciente ---")
-    cpf_removido = 303
-    db_paciente.db.raiz = db_paciente.cadastro_remover(cpf_removido)
-    print(f"Paciente com CPF {cpf_removido} removido por mudança de bairro.")
+    print(f"O paciente {db_paciente.cadastro_buscar(303).nome_completo} deseja mudar de UBS, remova o cadastro: ")
+    cpf_removido = int(input("Qual cadastro deve ser removido? "))
+    print(f"Paciente {db_paciente.cadastro_remover(cpf_removido).nome_completo} com CPF {cpf_removido} removido por mudança de bairro.")
+    print(f"Busca do cpf removido: {db_paciente.cadastro_buscar(303)}")
 
+    input()
     print("\n--- 3. Simulação de Atendimento na Recepção ---")
 
+    cpfs_chegada = []
+    for i in range(4):
+        cpfs_chegada.append(int(input("Digite o cpf do paciente para agendar um atendimento: ")))
 
+    input()
+    print("Cadastre de paciente: ")
+    db_paciente.cadastro_novo(int(input("Digite cpf do paciente: ")), input("Digite nome completo do paciente: "), input("Digite cartão do sus do paciente: "), input("Digite tipo de atendimento do paciente: "))
+    cpfs_chegada.append(int(input("Digite o cpf do paciente para agendar um atendimento: ")))
+
+    for cpf in cpfs_chegada:
+        db_paciente.agendar_atendimento(cpf)
+
+    input()
     print("\n--- 4. Imprimir a agenda de atendimentos do dia ---")
+    db_paciente.imprimir_atendimentos_dia(db_paciente.agenda.raiz)
+
+    print("Caso com agenda vazia: ")
+    db_paciente.flush_agenda()
     db_paciente.imprimir_atendimentos_dia(db_paciente.agenda.raiz)
