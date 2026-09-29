@@ -135,24 +135,37 @@ class GerenciardorPacientes:
             return None
 
     def agendar_atendimento(self, cpf:int):
-        cadastro = self.db.buscar_paciente(cpf)
+        cadastro = self.cadastro_buscar(cpf)
         if cadastro is None:
             print(f"Recepção: CPF {cpf} não cadastrado na base da UBS.")
             return
+        else:
+            self.contador_chegada += 1
+            self.agenda.cadastrar_paciente(cadastro, chave_alvo=self.contador_chegada)
+            print(f"Recepção: {cadastro.nome_completo} chegou e foi enfileirado.")
 
-        self.contador_chegada += 1
-        self.agenda.cadastrar_paciente(cadastro.paciente, chave_alvo=self.contador_chegada)
-        print(f"Recepção: {cadastro.paciente.nome_completo} chegou e foi enfileirado.")
+    def finalizar_atendimento(self):
+        if self.agenda.is_empty():
+            print("Não há atendimentos agendados para o dia de hoje.")
+        else:
+            paciente_atendido = self.agenda.raiz
+            while paciente_atendido.paciente.tipo_atendimento == "Concluído":
+                paciente_atendido = paciente_atendido.direita
+                if paciente_atendido is None:
+                    print(f"Não restam mais atendimentos para serem realizados")
+                    break
+            paciente_atendido.paciente.tipo_atendimento = "Concluído"
+            print("Atendimento concluído com sucesso.")
 
     def flush_agenda(self):
         if not self.agenda.is_empty():
-            self.agenda.remover_paciente(self.agenda.raiz.chave)
+            self.agenda.raiz = None
 
     def imprimir_atendimentos_dia(self, raiz: Optional[No]):
         if self.agenda.is_empty():
             print("Não há atendimentos agendados para o dia de hoje.")
         else:
-            print(f"Nome: {raiz.paciente.nome_completo} | CPF: {raiz.paciente.cpf}")
+            print(f"Nome: {raiz.paciente.nome_completo} | CPF: {raiz.paciente.cpf} | ATENDIMENTO {raiz.paciente.tipo_atendimento}")
             if raiz.esquerda is not None:
                 self.imprimir_atendimentos_dia(raiz.esquerda)
             if raiz.direita is not None:
@@ -198,19 +211,22 @@ if __name__ == "__main__":
     cpfs_chegada = []
     for i in range(4):
         cpfs_chegada.append(int(input("Digite o cpf do paciente para agendar um atendimento: ")))
+        db_paciente.agendar_atendimento(cpfs_chegada[i])
 
     input()
-    print("Cadastre de paciente: ")
+    print("Cadastro de paciente: ")
     db_paciente.cadastro_novo(int(input("Digite cpf do paciente: ")), input("Digite nome completo do paciente: "), input("Digite cartão do sus do paciente: "), input("Digite tipo de atendimento do paciente: "))
-    cpfs_chegada.append(int(input("Digite o cpf do paciente para agendar um atendimento: ")))
-
-    for cpf in cpfs_chegada:
-        db_paciente.agendar_atendimento(cpf)
+    db_paciente.agendar_atendimento(int(input("Digite o cpf do paciente para agendar um atendimento: ")))
 
     input()
     print("\n--- 4. Imprimir a agenda de atendimentos do dia ---")
     db_paciente.imprimir_atendimentos_dia(db_paciente.agenda.raiz)
 
+    input("\nComeçar atendimento dos pacientes: ")
+    db_paciente.finalizar_atendimento()
+    db_paciente.imprimir_atendimentos_dia(db_paciente.agenda.raiz)
+
+    input()
     print("Caso com agenda vazia: ")
     db_paciente.flush_agenda()
     db_paciente.imprimir_atendimentos_dia(db_paciente.agenda.raiz)
