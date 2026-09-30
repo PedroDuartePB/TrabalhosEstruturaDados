@@ -97,16 +97,14 @@ class ArvoreCadastros:
 
             return raiz, alvo_removido
 
-######################################################
-# --- para a atividade de prioridade quando ela chegar
-######################################################
-#class HeapAtendimento:
-#    def __init__(self):
-#        self.heap:list[No] = []
-#        self.cauda = 0
-#
-#    def cadastrar_atendimento_dia(self, cpf: int, nome: str, cartao_sus: str, tipo_atendimento: str):
-#        pass
+
+class HeapAtendimento:
+    def __init__(self):
+        self.heap:list[No] = []
+        self.cauda = 0
+
+    def cadastrar_atendimento_dia(self, cpf: int, nome: str, cartao_sus: str, tipo_atendimento: str):
+        pass
 
 
 ######################################################
@@ -116,9 +114,7 @@ class ArvoreCadastros:
 class GerenciardorPacientes:
     def __init__(self):
         self.db:ArvoreCadastros = ArvoreCadastros()
-        self.agenda = ArvoreCadastros()
-        self.contador_chegada = 0
-        #self.agenda = HeapAtendimento()
+        self.agenda = HeapAtendimento()
 
     def cadastro_remover(self, cpf:int):
         raiz = self.db.raiz
