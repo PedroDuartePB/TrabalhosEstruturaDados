@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
 
-
+#Poderia fazer algo com isso para ajudar na prioriadde depois, atendimentos diferentes somam ou diminuem no valor prioridade
 class TipoAtendimento(Enum):
-    VACINACAO = 0
+    CONSULTA = -1
+    VACINACAO = 1
+    EMERGENCIA = 3
 
 @dataclass
 class Paciente:

@@ -10,6 +10,12 @@ class No:
         self.esquerda: Optional['No'] = None
         self.direita: Optional['No'] = None
 
+    def __lt__(self, outro):
+        return self.chave_busca < outro.chave_busca
+
+    def __gt__(self, outro):
+        return self.chave_busca > outro.chave_busca
+
 
 class ArvoreBusca:
     def __init__(self):
@@ -89,44 +95,54 @@ class ArvoreBusca:
 class Heap:
     def __init__(self):
         self.heap:list[No] = []
-        self.cauda = 0
-
         # 2*i+1 (esquerda), 2*(i+1) (direita), (i-1)//2 (pai)
 
-    def _(self):
-        pass
+    def _trocar_posicoes(self, i:int, j:int):
+        self.heap[j], self.heap[i] = self.heap[i], self.heap[j]
 
-    def _(self):
-        pass
-
-    def _is_indice_valido(self, indice:int):
-        return 0 <= indice <= self.cauda
-
-    @staticmethod
-    def _get_pai(indice)->int:
+    def _get_indice_pai(self, indice)->int:
         return (indice-1)//2
-
-    def _is_folha(self, indice:int) -> bool:
-        return self._get_pai(self.cauda) < indice <= self.cauda
 
     def is_empty(self) -> bool:
         return len(self.heap) == 0
 
-    def inserir(self, dado, chave:int):
-        pass
+    def get_topo(self):
+        return self.heap[0]
+
+    def inserir(self, dado: object, chave:int):
+        novo_no = No(dado, chave)
+        self.heap.append(novo_no)
+
+        i = len(self.heap) - 1
+        while i > 0:
+            pai = self._get_indice_pai(i)
+            if self.heap[i].chave > self.heap[pai].chave:
+                self._trocar_posicoes(i, pai)
+                i = pai
+            else:
+                break
 
     def remover(self):
         if self.is_empty():
-            return - 1
-        elemento = self.heap[0]
-        self.cauda = self.cauda - 1
+            return None
+        if len(self.heap) == 1:
+            return self.heap.pop()
 
-        return elemento
+        topo = self.heap[0]
+        self.heap[0] = self.heap.pop()
+        self._heapify(0)
+        return topo
 
+    def heapify(self, i: int):
+        maior = i
+        esq = 2 * i + 1
+        dir = 2 * i + 2
+        tamanho = len(self.heap)
 
-
-
-
-
-
-
+        if esq < tamanho and self.heap[esq].chave > self.heap[maior].chave:
+            maior = esq
+        if dir < tamanho and self.heap[dir].chave > self.heap[maior].chave:
+            maior = dir
+        if maior != i:
+            self._trocar_posicoes(i, maior)
+            self._heapify(maior)
