@@ -10,6 +10,9 @@ class No:
         self.esquerda: Optional['No'] = None
         self.direita: Optional['No'] = None
 
+    def get_dado(self):
+        return self.paciente
+
     def __lt__(self, outro):
         return self.chave_busca < outro.chave_busca
 
@@ -123,13 +126,16 @@ class Heap:
         if self.is_empty():
             return None
         else:
-            ordenada:list[No] = self.heap
-            cauda = len(ordenada) - 1
+            heap:list[No] = self.heap.copy()
+            ordenada: list[No] = []
+            cauda = len(heap)
+            self._heapify(heap, cauda)
 
-            for i in range(1, cauda):
-                ordenada[i], ordenada[cauda] = ordenada[cauda], ordenada[i]
-                cauda -= 1
-                self._heapify(ordenada, i)
+            for i in range(cauda, 0, -1):
+                heap[0], heap[i-1] = heap[i-1], heap[0]
+                ordenada.append(heap.pop())
+                self._heapify(heap, 0)
+
             return ordenada
 
     def is_empty(self) -> bool:
@@ -144,7 +150,7 @@ class Heap:
 
         i = len(self.heap) - 1
         while i > 0:
-            pai = self._get_indice_pai()
+            pai = self._get_indice_pai(i)
             if self.heap[i].chave_busca > self.heap[pai].chave_busca:
                 self._trocar_posicoes(i, pai)
                 i = pai
