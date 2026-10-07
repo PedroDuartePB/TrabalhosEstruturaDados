@@ -8,9 +8,9 @@ def exibir_menu() -> str:
     print("=" * 35)
     print("1. Cadastrar paciente no sistema")
     print("2. Remover paciente do sistema")
-    print("3. Registrar chegada na recepção (Fila)")
+    print("3. Registrar chegada na recepção")
     print("4. Chamar próximo paciente (Atendimento)")
-    print("5. Visualizar próximo da fila")
+    print("5. Visualizar fila de espera")
     print("6. Sair do sistema")
     return input("Escolha uma opção: ")
 
@@ -48,6 +48,7 @@ def main():
                 print("❌ Erro: O CPF deve ser numérico.")
 
         elif opcao == '3':
+            idade:int = 0
             try:
                 cpf = int(input("Digite o CPF do paciente que chegou: "))
 
@@ -78,12 +79,21 @@ def main():
                 print("⚠️ Aviso: A fila de espera está vazia no momento.")
 
         elif opcao == '5':
+            alvo =  int(input("Digite o cpf do paciente consultado: "))
             try :
-                proximo = agenda.get_topo()
-                if proximo is not None:
-                    print(f"👀 PRÓXIMO DA FILA: {proximo.paciente.nome_completo} (Chave de prioridade: {proximo.chave_busca})")
+                proximo = agenda.get_sorted_heap()
+                if proximo is None:
+                    raise IndexError
                 else:
-                    print("ERRO NA CHECAGEM DA FILA")
+                    pos = 1
+                    for n in proximo:
+                        print(f"{n.paciente.nome_completo} | {pos}")
+                        pos += 1
+                        if n.paciente.cpf == alvo:
+                            print(f"{pos} pessoas até {n.paciente.nome_completo}")
+                            break
+
+
             except IndexError:
                 print("⚠️ Aviso: Não há pacientes aguardando na fila.")
 

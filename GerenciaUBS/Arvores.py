@@ -100,8 +100,37 @@ class Heap:
     def _trocar_posicoes(self, i:int, j:int):
         self.heap[j], self.heap[i] = self.heap[i], self.heap[j]
 
-    def _get_indice_pai(self, indice)->int:
+    @staticmethod
+    def _get_indice_pai(indice)->int:
         return (indice-1)//2
+
+    @staticmethod
+    def _heapify(lista:list[No], index: int):
+        maior = index
+        esquerda = 2 * index + 1
+        direita = 2 * index + 2
+        tamanho = len(lista)
+
+        if esquerda < tamanho and lista[esquerda].chave_busca > lista[maior].chave_busca:
+            maior = esquerda
+        if direita < tamanho and lista[direita].chave_busca > lista[maior].chave_busca:
+            maior = direita
+        if maior != index:
+            lista[index], lista[maior] = lista[maior], lista[index]
+            Heap._heapify(lista, maior)
+
+    def get_sorted_heap(self)->list[No]|None:
+        if self.is_empty():
+            return None
+        else:
+            ordenada:list[No] = self.heap
+            cauda = len(ordenada) - 1
+
+            for i in range(1, cauda):
+                ordenada[i], ordenada[cauda] = ordenada[cauda], ordenada[i]
+                cauda -= 1
+                self._heapify(ordenada, i)
+            return ordenada
 
     def is_empty(self) -> bool:
         return len(self.heap) == 0
@@ -115,8 +144,8 @@ class Heap:
 
         i = len(self.heap) - 1
         while i > 0:
-            pai = self._get_indice_pai(i)
-            if self.heap[i].chave > self.heap[pai].chave:
+            pai = self._get_indice_pai()
+            if self.heap[i].chave_busca > self.heap[pai].chave_busca:
                 self._trocar_posicoes(i, pai)
                 i = pai
             else:
@@ -130,19 +159,5 @@ class Heap:
 
         topo = self.heap[0]
         self.heap[0] = self.heap.pop()
-        self._heapify(0)
+        self._heapify(self.heap, 0)
         return topo
-
-    def heapify(self, i: int):
-        maior = i
-        esq = 2 * i + 1
-        dir = 2 * i + 2
-        tamanho = len(self.heap)
-
-        if esq < tamanho and self.heap[esq].chave > self.heap[maior].chave:
-            maior = esq
-        if dir < tamanho and self.heap[dir].chave > self.heap[maior].chave:
-            maior = dir
-        if maior != i:
-            self._trocar_posicoes(i, maior)
-            self._heapify(maior)
